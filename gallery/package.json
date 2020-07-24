@@ -1,0 +1,20 @@
+{
+  "name": "screenshot-gallery",
+  "version": "1.0.0",
+  "license": "UNLICENSED",
+  "private": true,
+  "description": "",
+  "main": "",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:cultureamp/screenshot-gallery-buildkite-plugin.git"
+  },
+  "author": "",
+  "dependencies": {},
+  "devDependencies": {}
+}

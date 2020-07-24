@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title><%= buildkite_pipeline_name %> Screenshot Gallery</title>
+    <style>
+      /* Micro-reset */
+      html { box-sizing: border-box; }
+      *, *:before, *:after { box-sizing: inherit; }
+
+      /* Gallery styles */
+      body {
+        font-family: sans-serif; font-size: 100%;
+        margin: 1em 2em;
+      }
+      .images > li {
+        margin: 2.5em 0;
+      }
+      .image-set {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+      }
+      .image-block {
+        flex: 0 0 33%;
+        max-height: 350px;
+      }
+      .image-caption {
+        display: block;
+        margin: 0 0 0.3em; padding: 0;
+      }
+      .image {
+        display: block;
+        max-width: 100%;
+      }
+
+      /* A cheap visual diff hack: overlay two images on top of each other, set the
+         mix-blend-mode to cancel each other out, and then invert the entire thing
+         so it's difference-on-white instead of difference-on-black. */
+      .diff {
+        position: relative; /* container for position: absolute below */
+        filter: invert(1) saturate(5000%); /* flip black-to-white, and magnify colour differences */
+        cursor: zoom-in;
+        border: 1px solid #222;
+        display: inline-block; /* inline-block to have the border only wrap the image inside. */
+      }
+      .diff__commit {
+        position: absolute;
+        left: 0; top: 0;
+        mix-blend-mode: difference;
+      }
+
+      /* Full-Screen Image styles */
+      body.showingDialog {
+        height: 100vh; overflow-y: hidden;
+        padding-right: 15px; /* compensate for the scroll bar */
+      }
+      .fullscreenable.showingDialog {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh; max-height: 100%;
+        overflow-y: scroll;
+        padding: 1em;
+        z-index: 1;
+        background: #fff;
+      }
+      .closeDialog { display: none; }
+      .fullscreenable.showingDialog > .closeDialog {
+        display: block;
+        float: right;
+        background: none; border: none;
+        font-size: 100%; line-height: 1;
+      }
+    </style>
+  </head>
+  <body>
+
+    <h1>System Tests Screenshots Gallery </h1>
+    <aside>
+      Branch <strong><%= triggering_repo_and_branch %></strong> (<%= triggering_commit %>)
+      <% if has_canonical_branch? %>
+        compared with <strong><%= canonical_repo_and_branch %></strong>
+      <% end %>
+    </aside>
+
+    <% if gallery_images.count == 0 %>
+      <p>No images found!</p>
+    <% else %>
+      <ul class="images">
+        <% gallery_images.each do |(triggering_commit_image, canonical_image)| %>
+          <li>
+            <h3><%= triggering_commit_image.title %></h3>
+            <div class="image-set">
+
+              <div class="image-block">
+                <% if has_canonical_branch? %>
+                  <p class="image-caption"><%= triggering_repo_and_branch %></p>
+                <% end %>
+                <a href="<%= triggering_commit_image.url %>">
+                  <img
+                    class="image"
+                    src="<%= triggering_commit_image.url %>"
+                  />
+                </a>
+              </div>
+
+              <% unless canonical_image.nil? %>
+
+                <div class="image-block">
+                  <p class="image-caption"><%= canonical_repo_and_branch %></p>
+                  <a href="<%= canonical_image.url %>">
+                    <img
+                      class="image"
+                      src="<%= canonical_image.url %>"
+                    />
+                  </a>
+                </div>
+
+                <div class="image-block fullscreenable" tabindex="0">
+                  <p class="image-caption">diff</p>
+                  <div class="diff">
+                    <img class="image" src="<%= canonical_image.url %>" />
+                    <img class="image diff__commit" src="<%= triggering_commit_image.url %>" />
+                  </div>
+                </div>
+
+              <% end %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <script>
+      // Party like it's 2005... but with 2017 APIs.
+
+      const fullscreenEnabledClass = 'showingDialog';
+      const currentFullscreenedBlock = () =>
+        document.querySelector(`div.${fullscreenEnabledClass}`);
+      const isFullscreenEnabledFor = block =>
+        block.classList.contains(fullscreenEnabledClass);
+      const enableFullscreenFor = block =>
+        [block, document.body].forEach(elt => elt.classList.add(fullscreenEnabledClass));
+      const disableFullscreenFor = block =>
+        [block, document.body].forEach(elt => elt.classList.remove(fullscreenEnabledClass));
+
+      for (const block of document.querySelectorAll('.fullscreenable')) {
+        // Create an X button in the corner for everything we want to be fullscreenable.
+        const closeButton = document.createElement('button');
+        closeButton.classList.add('closeDialog');
+        closeButton.setAttribute('aria-label', "Close preview");
+        closeButton.innerHTML = "𝖷";
+        block.prepend(closeButton);
+
+        // Set up events for opening and closing.
+        const onBlockClick = () => {
+          if (!isFullscreenEnabledFor(block)) enableFullscreenFor(block);
+        }
+        block.addEventListener('click', onBlockClick);
+        block.addEventListener('keydown', e => {
+          if (e.key === 'Enter') onBlockClick();
+        });
+
+        closeButton.addEventListener('click', e => {
+          e.stopPropagation(); // prevent the button click reaching the image-block
+          if (isFullscreenEnabledFor(block)) disableFullscreenFor(block);
+        });
+      }
+      // ... with a nicety for closing whatever dialog is open.
+      window.addEventListener('keyup', e => {
+        if (e.key === 'Esc' || e.key === 'Escape') {
+          e.preventDefault();
+          currentFullscreenedBlock().querySelector('button').click();
+        }
+      });
+    </script>
+  </body>
+</html>
