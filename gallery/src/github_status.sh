@@ -53,7 +53,7 @@ post_status() {
     return 0 # Silently fail if no token has been found.
   fi
 
-  local context="System Tests"
+  local context="${BUILDKITE_PIPELINE_NAME}"
   local time_since_start="$((SECONDS / 60)) minutes, $((SECONDS % 60)) seconds" # Uses Bash's $SECONDS global.
   case "$status" in
     pending)

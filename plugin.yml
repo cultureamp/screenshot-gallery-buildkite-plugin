@@ -7,6 +7,8 @@ configuration:
   properties:
     bucket_name:
       type: string
+    # The repo and branch that acts as the current state, so we can compare our screenshot against the current state.
+    # eg. murmur/master
     canonical_repo_and_branch:
       type: string
     screenshot_pattern:

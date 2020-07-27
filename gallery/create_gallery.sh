@@ -20,7 +20,16 @@ section() { echo "--- $1"; }
 # section. If a variable is missing, the `set -u` will make bash exit *here* instead
 # of in the middle of uploading or something.
 
-# 'triggering build', as in:
+# This plugin can be used to record screenshots for its own tests on its own code
+# (eg. kaizen-design-system capturing screenshots from its own build), or for tests
+# on another repo's tests (eg. the full-system tests capturing screenshots from its
+# build when running a murmur PR's code). To accommodate this flexibility, the
+# below is a little tricky.
+#
+# For the case of kaizen-design-system's own-tests-on-own-code build, a
+# 'triggering build' could mean any kaizen-design-system PR build or main-branch build.
+# 
+# In the case of the full-system tests, 'triggering build' could mean:
 # - a system-tests custom branch build (eg. system-tests running a build for
 #   system-tests branch my/branch/name), or
 # - a system-tests master branch build being triggered by a murmur custom branch build
@@ -34,8 +43,10 @@ export triggering_repo_and_branch="${triggering_buildkite_slug}/${BUILDKITE_TRIG
 export triggering_commit_images_dir="./${triggering_repo_and_commit}"
 
 # 'canonical branch' meaning the repo+branch you want any builds to be compared against.
-# We treat Murmur's master branch as the 'latest known good' thing to compare the
-# triggering build with, displaying its images inline along with diffs.
+# We treat this nominated canonical repo+branch as the 'latest known good' thing to
+# compare the triggering build with, displaying its images inline along with diffs.
+# It could be this repo (eg. kaizen-design-system/master for Kaizen), or it could
+# be another repo (eg. murmur/master for the full-system tests).
 export canonical_repo_and_branch="${CANONICAL_REPO_AND_BRANCH}" # eg. murmur/master
 export canonical_branch_images_dir="./${canonical_repo_and_branch}"
 
@@ -84,7 +95,7 @@ aws s3 sync --delete --acl public-read \
   "$triggering_commit_images_dir" "s3://${gallery_bucket_name}/${triggering_repo_and_commit}"
 
 
-# ... for murmur/master, if applicable:
+# ... if we are processing screenshots for the canonical branch
 
 if [ "$triggering_repo_and_branch" == "$canonical_repo_and_branch" ]; then
   mkdir -p "$canonical_branch_images_dir"
@@ -109,8 +120,8 @@ buildkite-agent artifact upload "redirect-to-gallery.html"
 
 ### Post-build notifications
 
-# Post a GitHub Status to the system-tests with the preview.
+# Post a GitHub Status to the main repo with a link to the screenshot gallery
 post_status_to_current_github_pr "success" "$gallery_index_url" "Screenshot gallery"
 
-# Post a GitHub Status to the Murmur PR that kicked off this build, if applicable.
+# Post a GitHub Status to the triggering repo with a link to the screenshot gallery, in case this build was triggered from a different repo.
 post_status_to_triggering_github_pr "success" "$gallery_index_url" "Screenshot gallery"
