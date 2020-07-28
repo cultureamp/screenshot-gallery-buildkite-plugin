@@ -1,0 +1,25 @@
+name: Screenshot Gallery
+description: Collects screenshots as a build, and creates+uploads a gallery of them, with comparisons to previous builds.
+author: https://github.com/cultureamp/screenshot-gallery-buildkite-plugin
+requirements:
+  - docker
+configuration:
+  properties:
+    bucket_name:
+      type: string
+    # The repo and branch that acts as the current state, so we can compare our screenshot against the current state.
+    # eg. murmur/master
+    canonical_repo_and_branch:
+      type: string
+    screenshot_pattern:
+      type: string
+    github_org:
+      type: string
+    github_repo:
+      type: string
+  required:
+    - bucket_name
+    - canonical_repo_and_branch
+    - github_org
+    - github_repo
+  additionalProperties: false

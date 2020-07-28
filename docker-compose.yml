@@ -1,0 +1,36 @@
+version: '3.4'
+services:
+  tests:
+    image: buildkite/plugin-tester
+    volumes:
+      - ".:/plugin"
+
+  generate-gallery:
+    build: ./gallery
+    environment:
+      # For S3-related actions:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SESSION_TOKEN
+      - AWS_DEFAULT_REGION
+      - GALLERY_BUCKET_NAME
+      - SCREENSHOT_PATTERN
+      - CANONICAL_REPO_AND_BRANCH
+
+      # For triggered builds:
+      - BUILDKITE_TRIGGERED_FROM_GITHUB_ORG
+      - BUILDKITE_TRIGGERED_FROM_GITHUB_REPO
+      - BUILDKITE_TRIGGERED_FROM_COMMIT
+      - BUILDKITE_TRIGGERED_FROM_BRANCH
+
+      # For both triggered and regular builds:
+      - BUILDKITE_GITHUB_ORG
+      - BUILDKITE_GITHUB_REPO
+      - BUILDKITE_PIPELINE_NAME
+      - BUILDKITE_COMMIT
+      - BUILDKITE_BRANCH
+
+      # For GitHub statuses:
+      - BUILDKITE_BUILD_NUMBER
+      - GITHUB_STATUS_ACCESS_TOKEN # ... or
+      - GITHUB_STATUS_ACCESS_TOKEN_PARAM_PATH
