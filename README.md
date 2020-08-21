@@ -18,6 +18,7 @@ steps:
       - cultureamp/screenshot-gallery:
           canonical_repo_and_branch: "murmur/master"
           bucket_name: "example-screenshot-gallery"
+          base_url: "http://s3.amazonaws.com/my-bucket-bucket"
           github_org: "cultureamp"
           github_repo: "example-repo"
           screenshot_pattern: "screenshot_*.png"
@@ -54,6 +55,10 @@ The name of the S3 bucket to publish to, eg. "example-screenshot-gallery"; this 
 
 The canonical repository and branch for screenshot comparisons, eg. `murmur/master`.
 
+### `base_url`
+
+The publicly accessible URL to the S3 bucket (without a trailing slash).
+
 ### `github_org`
 
 The GitHub organisation name (from the URL), eg. `cultureamp`.
@@ -65,6 +70,15 @@ The GitHub repository name (from the URL), eg. `example-repo`.
 ### `screenshot_pattern` (optional)
 
 The file pattern to look for when scooping up screenshots from the previous build steps. Defaults to `*.png`.
+
+### `github_status_access_token` (optional)
+
+A Github access token with permission to post status results back to commits / pull requests.
+
+### `github_status_access_token_param_path` (optional)
+
+A path to read a `github_status_access_token` from Parameter Store (SSM).
+
 
 
 Environment
