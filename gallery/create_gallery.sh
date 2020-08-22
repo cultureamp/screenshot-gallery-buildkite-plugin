@@ -57,18 +57,18 @@ export buildkite_pipeline_name="${BUILDKITE_PIPELINE_NAME}"
 export gallery_filename="index.html"
 export gallery_bucket_name="$GALLERY_BUCKET_NAME"
 # Prefix of paths inside S3 where screenshots are saved. Should include a trailing slash, no leading slash.
-export gallery_path_prefix="screenshots/"
-export gallery_index_url="${GALLERY_BASE_URL}/${gallery_path_prefix}${triggering_repo_and_commit}/${gallery_filename}"
+export gallery_path_prefix="/screenshots/"
+export gallery_index_url="${GALLERY_BASE_URL}${gallery_path_prefix}${triggering_repo_and_commit}/${gallery_filename}"
 
 ### Download the 'current master' gallery, if available.
 
 if
   [ "$triggering_repo_and_branch" != "$canonical_repo_and_branch" ] && \
-  aws s3 ls "s3://${gallery_bucket_name}/${gallery_path_prefix}${canonical_repo_and_branch}/${gallery_filename}"
+  aws s3 ls "s3://${gallery_bucket_name}${gallery_path_prefix}${canonical_repo_and_branch}/${gallery_filename}"
 then
   section "Download '${canonical_repo_and_branch}' branch gallery"
   aws s3 sync --delete \
-    "s3://${gallery_bucket_name}/${gallery_path_prefix}${canonical_repo_and_branch}" "$canonical_branch_images_dir"
+    "s3://${gallery_bucket_name}${gallery_path_prefix}${canonical_repo_and_branch}" "$canonical_branch_images_dir"
   ls -lh
 fi
 
@@ -94,7 +94,7 @@ docker-compose \
 
 section "Upload screenshots + .html to ${gallery_bucket_name}"
 aws s3 sync --delete --acl public-read \
-  "${triggering_commit_images_dir}" "s3://${gallery_bucket_name}/${gallery_path_prefix}${triggering_repo_and_commit}"
+  "${triggering_commit_images_dir}" "s3://${gallery_bucket_name}${gallery_path_prefix}${triggering_repo_and_commit}"
 
 
 # ... if we are processing screenshots for the canonical branch
@@ -105,7 +105,7 @@ if [ "$triggering_repo_and_branch" == "$canonical_repo_and_branch" ]; then
 
   section "Update '${canonical_repo_and_branch}' branch gallery"
   aws s3 sync --delete --acl public-read \
-    "$canonical_branch_images_dir" "s3://${gallery_bucket_name}/${gallery_path_prefix}${canonical_repo_and_branch}"
+    "$canonical_branch_images_dir" "s3://${gallery_bucket_name}${gallery_path_prefix}${canonical_repo_and_branch}"
 fi
 
 
