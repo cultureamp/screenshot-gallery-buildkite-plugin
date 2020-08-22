@@ -57,7 +57,7 @@ export buildkite_pipeline_name="${BUILDKITE_PIPELINE_NAME}"
 export gallery_filename="index.html"
 export gallery_bucket_name="$GALLERY_BUCKET_NAME"
 # Prefix of paths inside S3 where screenshots are saved. Should include both a leading and trailing slash.
-export path_to_gallery_in_s3="${PATH_TO_GALLERY_IN_S3}:-/screenshots/"
+export path_to_gallery_in_s3="${PATH_TO_GALLERY_IN_S3:-/screenshots/}"
 export gallery_index_url="${GALLERY_BASE_URL}${path_to_gallery_in_s3}${triggering_repo_and_commit}/${gallery_filename}"
 
 ### Download the 'current master' gallery, if available.
