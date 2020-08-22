@@ -6,7 +6,7 @@ require 'pathname'
 
 class GalleryTemplate < Struct.new(
   :buildkite_pipeline_name,
-  :gallery_path_prefix,
+  :path_to_gallery_in_s3,
   :canonical_branch_images_dir,
   :canonical_repo_and_branch,
   :triggering_commit,
@@ -53,7 +53,7 @@ class GalleryTemplate < Struct.new(
   def images_for_path(path)
     Dir["#{path}/**/*.png"].map do |filename|
       Image.new(
-        url: "#{gallery_path_prefix}#{nice_path(filename)}",
+        url: "#{path_to_gallery_in_s3}#{nice_path(filename)}",
         filename: File.basename(filename),
         title: File.basename(filename, '.png'),
       )
@@ -71,7 +71,7 @@ end
 
 env_vars = %w(
   buildkite_pipeline_name
-  gallery_path_prefix
+  path_to_gallery_in_s3
   canonical_branch_images_dir
   canonical_repo_and_branch
   triggering_commit
