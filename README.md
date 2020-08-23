@@ -45,41 +45,7 @@ In the triggering pipeline (the one that kicks off the second build):
 Options
 -------
 
-### `bucket_name`
-
-The name of the S3 bucket to publish to, eg. "example-screenshot-gallery"; this bucket will have screenshots then namespaced by repo and either branch or commit.
-
-(The Buildkite pipeline will need to have access to this S3 bucket in the base infrastructure repository.)
-
-### `canonical_repo_and_branch`
-
-The canonical repository and branch for screenshot comparisons, eg. `murmur/master`.
-
-### `base_url`
-
-The publicly accessible URL to the S3 bucket (without a trailing slash).
-
-### `github_org`
-
-The GitHub organisation name (from the URL), eg. `cultureamp`.
-
-### `github_repo`
-
-The GitHub repository name (from the URL), eg. `example-repo`.
-
-### `screenshot_pattern` (optional)
-
-The file pattern to look for when scooping up screenshots from the previous build steps. Defaults to `*.png`.
-
-### `github_status_access_token` (optional)
-
-A Github access token with permission to post status results back to commits / pull requests.
-
-### `github_status_access_token_param_path` (optional)
-
-A path to read a `github_status_access_token` from Parameter Store (SSM).
-
-
+See [plugin.yml](./plugin.yml) for a description of all options.
 
 Environment
 -----------

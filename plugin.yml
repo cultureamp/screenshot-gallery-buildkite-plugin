@@ -5,23 +5,50 @@ requirements:
   - docker
 configuration:
   properties:
-    bucket_name:
-      type: string
-    # The repo and branch that acts as the current state, so we can compare our screenshot against the current state.
-    # eg. murmur/master
-    canonical_repo_and_branch:
-      type: string
-    screenshot_pattern:
-      type: string
+    # The GitHub organisation name (from the URL)
+    # eg. "cultureamp"
     github_org:
       type: string
+    # The GitHub repository name (from the URL)
+    # eg. "example-app"
     github_repo:
       type: string
+    # The repo and branch that acts as the current state, so we can compare our screenshot against the current state.
+    # eg. example-app/master
+    canonical_repo_and_branch:
+      type: string
+    # The name of the S3 bucket to publish to, eg. "example-screenshot-gallery".
+    # This bucket will store screenshots namespaced by repo and either branch or commit.
+    # The buildkite step will need access to write to this bucket.
+    # eg. my-dev-assets
+    bucket_name:
+      type: string
+    # The publicly accessible URL to the S3 bucket (without a trailing slash).
+    # eg. https://s3.amazonaws.com/my-dev-assets
+    base_url:
+      type: string
+    # The path in S3 to save the gallery assets to. (with both a leading and trailing slash).
+    # default: /screenshots/
     path_to_gallery_in_s3:
       type: string
+    # The file glob pattern to look for when scooping up screenshots from the previous build steps.
+    # default "*.png"
+    screenshot_pattern:
+      type: string
+    # A Github access token with permission to post status results back to commits / pull requests. (Must have the repo:status permission).
+    # Either `github_status_access_token` or `github_status_access_token_param_path` must be supplied.
+    # eg. 123abc456def789ghijklmn123op
+    github_status_access_token:
+      type: string
+    # The path to fetch `github_status_access_token` from Parameter Store (SSM).
+    # Either `github_status_access_token` or `github_status_access_token_param_path` must be supplied.
+    # eg. /my/parameters/GITHUB_STATUS_ACCESS_TOKEN
+    github_status_access_token_param_path:
+      type: stirng
   required:
-    - bucket_name
     - canonical_repo_and_branch
     - github_org
     - github_repo
+    - bucket_name
+    - base_url
   additionalProperties: false
