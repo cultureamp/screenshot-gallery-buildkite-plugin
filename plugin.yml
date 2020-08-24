@@ -44,7 +44,7 @@ configuration:
     # Either `github_status_access_token` or `github_status_access_token_param_path` must be supplied.
     # eg. /my/parameters/GITHUB_STATUS_ACCESS_TOKEN
     github_status_access_token_param_path:
-      type: stirng
+      type: string
   required:
     - canonical_repo_and_branch
     - github_org
