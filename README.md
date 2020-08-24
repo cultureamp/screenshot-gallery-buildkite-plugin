@@ -18,7 +18,7 @@ steps:
       - cultureamp/screenshot-gallery:
           canonical_repo_and_branch: "murmur/master"
           bucket_name: "example-screenshot-gallery"
-          base_url: "http://s3.amazonaws.com/my-bucket-bucket"
+          base_url: "http://s3.amazonaws.com/example-screenshot-gallery"
           github_org: "cultureamp"
           github_repo: "example-repo"
           screenshot_pattern: "screenshot_*.png"
