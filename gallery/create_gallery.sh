@@ -28,7 +28,7 @@ section() { echo "--- $1"; }
 #
 # For the case of kaizen-design-system's own-tests-on-own-code build, a
 # 'triggering build' could mean any kaizen-design-system PR build or main-branch build.
-# 
+#
 # In the case of the full-system tests, 'triggering build' could mean:
 # - a system-tests custom branch build (eg. system-tests running a build for
 #   system-tests branch my/branch/name), or
@@ -40,7 +40,7 @@ export triggering_buildkite_slug="${BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG
 export triggering_commit="${BUILDKITE_TRIGGERED_FROM_COMMIT:-$BUILDKITE_COMMIT}"
 export triggering_repo_and_commit="${triggering_buildkite_slug}/${triggering_commit}"
 export triggering_repo_and_branch="${triggering_buildkite_slug}/${BUILDKITE_TRIGGERED_FROM_BRANCH:-$BUILDKITE_BRANCH}"
-export triggering_commit_images_dir="./${triggering_repo_and_commit}"
+export triggering_commit_images_dir="${triggering_repo_and_commit}"
 
 # 'canonical branch' meaning the repo+branch you want any builds to be compared against.
 # We treat this nominated canonical repo+branch as the 'latest known good' thing to
@@ -48,7 +48,7 @@ export triggering_commit_images_dir="./${triggering_repo_and_commit}"
 # It could be this repo (eg. kaizen-design-system/master for Kaizen), or it could
 # be another repo (eg. murmur/master for the full-system tests).
 export canonical_repo_and_branch="${CANONICAL_REPO_AND_BRANCH}" # eg. murmur/master
-export canonical_branch_images_dir="./${canonical_repo_and_branch}"
+export canonical_branch_images_dir="${canonical_repo_and_branch}"
 
 export screenshot_pattern="${SCREENSHOT_PATTERN:-*.png}"
 
@@ -56,19 +56,19 @@ export buildkite_pipeline_name="${BUILDKITE_PIPELINE_NAME}"
 
 export gallery_filename="index.html"
 export gallery_bucket_name="$GALLERY_BUCKET_NAME"
-export gallery_index_url="${GALLERY_BASE_URL}/${triggering_repo_and_commit}/${gallery_filename}"
-export gallery_url_base="/"
-
+# Prefix of paths inside S3 where screenshots are saved. Should include both a leading and trailing slash.
+export path_to_gallery_in_s3="${PATH_TO_GALLERY_IN_S3:-/screenshots/}"
+export gallery_index_url="${GALLERY_BASE_URL}${path_to_gallery_in_s3}${triggering_repo_and_commit}/${gallery_filename}"
 
 ### Download the 'current master' gallery, if available.
 
 if
   [ "$triggering_repo_and_branch" != "$canonical_repo_and_branch" ] && \
-  aws s3 ls "s3://${gallery_bucket_name}/${canonical_repo_and_branch}/${gallery_filename}"
+  aws s3 ls "s3://${gallery_bucket_name}${path_to_gallery_in_s3}${canonical_repo_and_branch}/${gallery_filename}"
 then
   section "Download '${canonical_repo_and_branch}' branch gallery"
   aws s3 sync --delete \
-    "s3://${gallery_bucket_name}/${canonical_repo_and_branch}" "$canonical_branch_images_dir"
+    "s3://${gallery_bucket_name}${path_to_gallery_in_s3}${canonical_repo_and_branch}" "$canonical_branch_images_dir"
   ls -lh
 fi
 
@@ -82,17 +82,19 @@ mkdir -p "$triggering_commit_images_dir"
 buildkite-agent artifact download "${screenshot_pattern}" "${triggering_commit_images_dir}/"
 
 section "Build screenshot gallery .html"
-docker-compose run \
+docker-compose \
+  --file docker-compose.yml \
+  run \
   -e buildkite_pipeline_name \
   -e triggering_commit -e triggering_repo_and_branch -e canonical_repo_and_branch \
-  -e triggering_commit_images_dir -e canonical_branch_images_dir -e gallery_url_base \
+  -e triggering_commit_images_dir -e canonical_branch_images_dir -e path_to_gallery_in_s3 \
   -v "$PWD:/app" -w /app \
   generate-gallery \
   "/app/gallery/src/gallery.rb" "${triggering_commit_images_dir}/${gallery_filename}"
 
 section "Upload screenshots + .html to ${gallery_bucket_name}"
 aws s3 sync --delete --acl public-read \
-  "$triggering_commit_images_dir" "s3://${gallery_bucket_name}/${triggering_repo_and_commit}"
+  "${triggering_commit_images_dir}" "s3://${gallery_bucket_name}${path_to_gallery_in_s3}${triggering_repo_and_commit}"
 
 
 # ... if we are processing screenshots for the canonical branch
@@ -103,7 +105,7 @@ if [ "$triggering_repo_and_branch" == "$canonical_repo_and_branch" ]; then
 
   section "Update '${canonical_repo_and_branch}' branch gallery"
   aws s3 sync --delete --acl public-read \
-    "$canonical_branch_images_dir" "s3://${gallery_bucket_name}/${canonical_repo_and_branch}"
+    "$canonical_branch_images_dir" "s3://${gallery_bucket_name}${path_to_gallery_in_s3}${canonical_repo_and_branch}"
 fi
 
 

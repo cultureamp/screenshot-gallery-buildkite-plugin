@@ -16,6 +16,7 @@ services:
       - GALLERY_BUCKET_NAME
       - SCREENSHOT_PATTERN
       - CANONICAL_REPO_AND_BRANCH
+      - PATH_TO_GALLERY_IN_S3
 
       # For triggered builds:
       - BUILDKITE_TRIGGERED_FROM_GITHUB_ORG
