@@ -1,0 +1,17 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: screenshot-gallery-buildkite-plugin
+  description: >
+    Collects screenshots as a build, and creates+uploads a gallery of them, with comparisons to previous builds.
+  tags:
+    - users-na
+    - camp-foundations
+    - data-none
+  annotations:
+    github.com/project-slug: cultureamp/screenshot-gallery-buildkite-plugin
+    github.com/team-slug: cultureamp/front-end-foundations
+spec:
+  type: library
+  owner: front-end-foundations
+  lifecycle: production
