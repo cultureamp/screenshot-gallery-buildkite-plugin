@@ -1,6 +1,13 @@
 Screenshot Gallery Buildkite Plugin
 ===================================
 
+## ARCHIVED
+
+This repository is no longer in use. We do not recommend using this plugin now that Culture Amp has a license to [Chromatic](https://www.chromatic.com/).
+
+-----
+
+
 A [Buildkite plugin](https://buildkite.com/docs/agent/plugins) that collects screenshots from a build, and makes it available as a gallery HTML+images bundle viewable from the triggering pull request and Buildkite build, with comparisons to screenshots from previous builds.
 
 This relies on a little bit of setup, mostly an `aws-assume-role`, and some parameters to tell the plugin how to identify the screenshots and where to upload the screenshots to.
